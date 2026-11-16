@@ -146,22 +146,22 @@ Connect your LiPo pack to **GPIO 33** through a voltage divider:
 ```mermaid
 flowchart TD
     subgraph Core0["ESP32 Core 0 (Communications & I/O)"]
-        WiFi[WiFi AP / Station Server]
-        Web[Web Ground Control Station]
-        OTA[ArduinoOTA Engine]
+        WiFi["WiFi AP / Station Server"]
+        Web["Web Ground Control Station"]
+        OTA["ArduinoOTA Engine"]
         iBUS_Task["iBUS Receiver Task (115200 baud)"]
         iBUS_Tel["iBUS Telemetry (Half-Duplex GPIO 27)"]
     end
 
-    subgraph Core1["ESP32 Core 1 (Real-Time Flight Loop - 250 Hz)"]
-        MPU[MPU6050 Accel + Gyro 250 Hz]
-        BMP[BMP180 Barometer Altitude]
-        MAG[QMC5883L Compass]
-        GPS[TinyGPS++ Parsing]
-        Attitude[Complementary Filter Fusion]
-        PID[Dual PID: Angle & Rate Controllers]
-        NAV[Autonomous GPS Hold / RTH State Machine]
-        LEDC[LEDC Hardware PWM Generator (250 Hz)]
+    subgraph Core1["ESP32 Core 1 (Real-Time Flight Loop 250 Hz)"]
+        MPU["MPU6050 Accel + Gyro 250 Hz"]
+        BMP["BMP180 Barometer Altitude"]
+        MAG["QMC5883L Compass"]
+        GPS["TinyGPS++ Parsing"]
+        Attitude["Complementary Filter Fusion"]
+        PID["Dual PID: Angle & Rate Controllers"]
+        NAV["Autonomous GPS Hold / RTH State Machine"]
+        LEDC["LEDC Hardware PWM Generator (250 Hz)"]
     end
 
     iBUS_Task -->|Thread-Safe Mutex| Attitude
@@ -172,7 +172,7 @@ flowchart TD
     Attitude --> PID
     NAV --> PID
     PID --> LEDC
-    LEDC --> Motors[M1, M2, M3, M4 ESCs]
+    LEDC --> Motors["M1, M2, M3, M4 ESCs"]
     Web <-->|Async REST Telemetry| Attitude
     Attitude -.->|Live Flight State| iBUS_Tel
 ```
@@ -198,10 +198,10 @@ When triggered manually by switch or automatically by failsafe:
 ```mermaid
 flowchart LR
     A["RTH Triggered"] --> B["1. Climb to RTH Altitude (default 15m)"]
-    B --> C["2. Rotate & Fly Straight to Home"]
+    B --> C["2. Rotate and Fly Straight to Home"]
     C --> D["3. Hover over Home Position"]
     D --> E["4. Controlled Descent (0.6 m/s)"]
-    E --> F["5. Touchdown Detection & Auto-Disarm"]
+    E --> F["5. Touchdown Detection and Auto-Disarm"]
 ```
 * **Cancellation**: Flicking Pitch or Roll sticks immediately exits RTH and returns control to manual Angle mode.
 * **GPS Signal Loss in RTH**: If GPS fix is degraded during RTH, the drone auto-levels and descends vertically in place.
@@ -296,19 +296,19 @@ sequenceDiagram
     participant FC as ESP32 FC
     participant ESC as ESCs & Motors
 
-    User->>WebUI: Click "⚡ Auto Cal (10s MAX → 10s MIN)"
+    User->>WebUI: Click Auto Cal (10s MAX to 10s MIN)
     WebUI->>FC: GET /esccal?cmd=auto
-    FC->>ESC: Output MAX Throttle (2000 µs)
+    FC->>ESC: Output MAX Throttle (2000 us)
     Note over FC,ESC: Phase 1: 10 Seconds MAX Window
     User->>ESC: Plug in LiPo Battery
     ESC-->>User: Musical startup beeps + 2 confirmation beeps (MAX captured)
     Note over FC,ESC: Timer elapses (10 seconds)
-    FC->>ESC: Output MIN Throttle (1000 µs)
+    FC->>ESC: Output MIN Throttle (1000 us)
     Note over FC,ESC: Phase 2: 10 Seconds MIN Window
     ESC-->>User: Low-throttle confirmation beeps + Arming tone
     Note over FC,ESC: Timer elapses (10 seconds)
     FC->>ESC: Stop Signal (Idle)
-    FC-->>WebUI: "ESC calibration finished"
+    FC-->>WebUI: ESC calibration finished
 ```
 
 1. Keep the battery **disconnected** and props **off**. Power the ESP32 via USB.
